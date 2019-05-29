@@ -22,10 +22,10 @@
     
     <item>
       <title>Twitch chat Client (part 1)</title>
-      <link>https://norbertka.me/posts/simple-irc-v3-client/</link>
+      <link>https://norbertka.me/posts/twitch-chat-client-part-1/</link>
       <pubDate>Sun, 14 Apr 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://norbertka.me/posts/simple-irc-v3-client/</guid>
+      <guid>https://norbertka.me/posts/twitch-chat-client-part-1/</guid>
       <description>Introduction In this 3 part tutorial series we&amp;rsquo;re going to explore TCP Connection handling; IRCv3 message parsing and connection handling for Twitch.tv Chat. Here in first part of the tutorial we&amp;rsquo;re going to implement IRC protocol Client for our Twitch.tv Chat Client.
 Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research First of all, we should start with research:
  How to connect to IRC server How to send IRC messages.</description>
