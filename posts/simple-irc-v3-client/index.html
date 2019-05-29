@@ -7,8 +7,8 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <meta name="description" content="Introduction In this 3 part tutorial series we&amp;rsquo;re going to explore TCP Connection handling; IRCv3 message parsing and connection handling for Twitch.tv Chat. Here in first part of the tutorial we&amp;rsquo;re going to implement IRC protocol Client for our Twitch.tv Chat Client.
-Research First of all, we should start with research:
- How to connect to IRC server How to send IRC messages. Is Twitch.tv chat fully IRC capable? Are there any special Twitch."/>
+Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research First of all, we should start with research:
+ How to connect to IRC server How to send IRC messages."/>
 <meta name="keywords" content=""/>
 <meta name="robots" content="noodp"/>
 <link rel="canonical" href="https://norbertka.me/posts/simple-irc-v3-client/" />
@@ -32,8 +32,8 @@ Research First of all, we should start with research:
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="Twitch chat Client (part 1) :: NorbertKa — Personal blog" />
 <meta name="twitter:description" content="Introduction In this 3 part tutorial series we&amp;rsquo;re going to explore TCP Connection handling; IRCv3 message parsing and connection handling for Twitch.tv Chat. Here in first part of the tutorial we&amp;rsquo;re going to implement IRC protocol Client for our Twitch.tv Chat Client.
-Research First of all, we should start with research:
- How to connect to IRC server How to send IRC messages. Is Twitch.tv chat fully IRC capable? Are there any special Twitch." />
+Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research First of all, we should start with research:
+ How to connect to IRC server How to send IRC messages." />
 <meta name="twitter:site" content="https://norbertka.me/" />
 <meta name="twitter:creator" content="Norberts Kakste" />
 <meta name="twitter:image" content="">
@@ -43,8 +43,8 @@ Research First of all, we should start with research:
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Twitch chat Client (part 1) :: NorbertKa — Personal blog">
 <meta property="og:description" content="Introduction In this 3 part tutorial series we&amp;rsquo;re going to explore TCP Connection handling; IRCv3 message parsing and connection handling for Twitch.tv Chat. Here in first part of the tutorial we&amp;rsquo;re going to implement IRC protocol Client for our Twitch.tv Chat Client.
-Research First of all, we should start with research:
- How to connect to IRC server How to send IRC messages. Is Twitch.tv chat fully IRC capable? Are there any special Twitch." />
+Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research First of all, we should start with research:
+ How to connect to IRC server How to send IRC messages." />
 <meta property="og:url" content="https://norbertka.me/posts/simple-irc-v3-client/" />
 <meta property="og:site_name" content="Twitch chat Client (part 1)" />
 <meta property="og:image" content="">
@@ -155,6 +155,12 @@ Research First of all, we should start with research:
 <h4 id="introduction">Introduction</h4>
 
 <p>In this 3 part tutorial series we&rsquo;re going to explore <code>TCP</code> Connection handling; <code>IRCv3</code> message parsing and connection handling for <code>Twitch.tv</code> Chat. Here in first part of the tutorial we&rsquo;re going to implement <code>IRC</code> protocol <code>Client</code> for our <code>Twitch.tv</code> Chat Client.</p>
+
+<h4 id="prerequisites">Prerequisites</h4>
+
+<ul>
+<li>Basic understanding of <a href="https://lv.wikipedia.org/wiki/TCP">TCP</a> Protocol and <a href="https://doc.akka.io/docs/akka/current/actors.html">Akka</a> actors</li>
+</ul>
 
 <h4 id="research">Research</h4>
 
