@@ -215,7 +215,34 @@ In <code>Twitch.tv</code> IRC server case that would be supplying our <code>PASS
 
 <script id="asciicast-248861" src="https://asciinema.org/a/248861.js" async></script>
 
-<p>We can see the incoming flow of messages now, while that is good we can do alot better with <code>CAP</code> (Client Capability Negotiation). In <a href="https://dev.twitch.tv/docs/irc/guide/">Chatbots &amp; IRC Guide</a> you can see that <code>Twitch.tv</code> chat supports IRC v3 capability registration that allows us to <em>request</em> extra parameters that we would like to <em>receive</em> from <code>Twitch.tv</code> Chat.</p>
+<p>Now we can see the incoming flow of messages and their format, inspecting it further it seems to follow a simple <code>:[PREFIX] [COMMAND] :PARAMETERS</code> pattern.</p>
+
+<p>For eg. inspecting one message from <code>ncat</code> output:</p>
+
+<pre><code>:tetomanya!tetomanya@tetomanya.tmi.twitch.tv PRIVMSG #asmongold :pepega   
+</code></pre>
+
+<p>We can see that it consists of these message parts:</p>
+
+<ul>
+<li><code>:tetomanya!tetomanya@tetomanya.tmi.twitch.tv</code> [PREFIX]</li>
+<li><code>PRIVMSG</code> [COMMAND]</li>
+<li><code>#asmongold :pepega</code> [PARAMETERS]</li>
+</ul>
+
+<p>And looking at <a href="https://ircv3.net/specs/extensions/message-tags.html"><code>IRCv3</code></a> specification about <code>IRC</code> message format you can see that it&rsquo;s <a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">Backus–Naur form</a> (BNF) is defined as:</p>
+
+<pre><code>&lt;message&gt;       ::= ['@' &lt;tags&gt; &lt;SPACE&gt;] [':' &lt;prefix&gt; &lt;SPACE&gt; ] &lt;command&gt; &lt;params&gt; &lt;crlf&gt;
+&lt;tags&gt;          ::= &lt;tag&gt; [';' &lt;tag&gt;]*
+&lt;tag&gt;           ::= &lt;key&gt; ['=' &lt;escaped_value&gt;]
+&lt;key&gt;           ::= [ &lt;client_prefix&gt; ] [ &lt;vendor&gt; '/' ] &lt;key_name&gt;
+&lt;client_prefix&gt; ::= '+'
+&lt;key_name&gt;      ::= &lt;non-empty sequence of ascii letters, digits, hyphens ('-')&gt;
+&lt;escaped_value&gt; ::= &lt;sequence of zero or more bytes except NUL, CR, LF, semicolon (`;`) and SPACE&gt;
+&lt;vendor&gt;        ::= &lt;host&gt;
+</code></pre>
+
+<p>Which resembles our incoming and outgoing messages, but closely looking at it we can see that it should support some kind of <code>TAG</code> system with <code>key-value</code> pairs, that&rsquo;s where <code>CAP</code> (Client Capability Negotiation) requests come in. In <a href="https://dev.twitch.tv/docs/irc/guide/">Chatbots &amp; IRC Guide</a> you can see that <code>Twitch.tv</code> chat supports IRC v3 capability registration that allows us to <em>request</em> extra parameters that we would like to <em>receive</em> from <code>Twitch.tv</code> Chat.</p>
 
 <p>Here&rsquo;s a list of all <code>irc.chat.twitch.tv:6697</code> CAP (capabilities) and their request <strong>commands</strong></p>
 
@@ -259,7 +286,99 @@ In <code>Twitch.tv</code> IRC server case that would be supplying our <code>PASS
 
 <script id="asciicast-248862" src="https://asciinema.org/a/248862.js" async></script>
 
-<p>Looks like we&rsquo;re done with general <code>IRC</code> exploration with <code>ncat</code> so we&rsquo;re gonna move on and make our own <code>TwitchChatClient</code> in <code>Scala</code></p>
+<p>Isolating one message we can see that it consists of multiple <code>key-value</code> pairs that represent information about received command (in our case <code>PRIVMSG</code>)</p>
+
+<p>Isolated message:</p>
+
+<pre><code>@badge-info=;badges=;color=#0000FF;display-name=ImmortalTerran;emotes=;flags=;id=8f56cd3d-de48-4c23-acef-7cc09c86b233;mo
+d=0;room-id=26261471;subscriber=0;tmi-sent-ts=1559087238363;turbo=0;user-id=139246656;user-type= :immortalterran!immorta
+lterran@immortalterran.tmi.twitch.tv PRIVMSG #asmongold :Clap
+</code></pre>
+
+<p>Message <code>key-value</code> pairs:</p>
+
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>badges-info</td>
+<td></td>
+</tr>
+
+<tr>
+<td>badges</td>
+<td></td>
+</tr>
+
+<tr>
+<td>color</td>
+<td>#0000FF</td>
+</tr>
+
+<tr>
+<td>display-name</td>
+<td>ImmortalTerran</td>
+</tr>
+
+<tr>
+<td>emotes</td>
+<td></td>
+</tr>
+
+<tr>
+<td>flags</td>
+<td></td>
+</tr>
+
+<tr>
+<td>id</td>
+<td>8f56cd3d-de48-4c23-acef-7cc09c86b233</td>
+</tr>
+
+<tr>
+<td>mod</td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>room-id</td>
+<td>26261471</td>
+</tr>
+
+<tr>
+<td>subscriber</td>
+<td>0</td>
+</tr>
+
+<tr>
+<td>tmi-sent-ts</td>
+<td>1559087238363</td>
+</tr>
+
+<tr>
+<td>turbo</td>
+<td></td>
+</tr>
+
+<tr>
+<td>user-id</td>
+<td>139246656</td>
+</tr>
+
+<tr>
+<td>user-type</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+<p>Going further into tutorial we should be able to parse these <code>key-value</code> pairs to extract information from incoming messages, but for now we&rsquo;re done with general <code>IRC</code> exploration with <code>ncat</code> so we&rsquo;re gonna move on and make our own <code>TwitchChatClient</code> in <code>Scala</code></p>
 
 <h4 id="twitchircclient">TwitchIrcClient</h4>
 
@@ -300,7 +419,26 @@ val port = 6667
 val remoteAddress = new InetSocketAddress(host, port)
 </code></pre>
 
-<p>Ok now we know <em>address</em> and <em>port</em> for connection, and we already created <code>InetSocketAddress</code> <strong>object</strong>, so we&rsquo;re ready to create our simple <code>TwitchChatClient</code> actor that will connect to our <code>remoteAddress</code></p>
+<p>Ok now we know <em>address</em> and <em>port</em> for connection, and we already created <code>InetSocketAddress</code> <strong>object</strong>, so we&rsquo;re ready to create our simple <code>TwitchChatClient</code> actor that will connect to our <code>remoteAddress</code>.</p>
+
+<p>To establish <code>TCP</code> connection with Akka actors we&rsquo;re gonna use imported <code>IO</code> and <code>Tcp</code> modules that help with <code>TCP</code> connection management.</p>
+
+<p>First of all we need to create actor that accepts <code>InetSocketAddress</code> as it&rsquo;s parameter to know which <code>address</code> and <code>port</code> we should connect to.</p>
+
+<pre><code class="language-java">class TwitchChatClient(remoteAddress: InetSocketAddress) extends Actor {
+  import context.system
+
+  println(s&quot;Connecting to ${remoteAddress.getHostName}:${remoteAddress.getPort}&quot;) // Print out Connection to {address} {port} message
+
+  IO(Tcp) ! Connect(remoteAddress = remoteAddress) // Establish TCP connection
+
+  def receive = {
+
+  }
+}
+</code></pre>
+
+<p>Now to handle <code>TCP</code> connection <strong>Failure</strong> or <strong>Success</strong> we need to implement <code>CommandFailed</code> and <code>Connected</code> messages for our receiver</p>
 
 <pre><code class="language-java">class TwitchChatClient(remoteAddress: InetSocketAddress) extends Actor {
 
@@ -315,13 +453,37 @@ val remoteAddress = new InetSocketAddress(host, port)
     // Connection failed
     case CommandFailed(_: Connect) =&gt;
       println(&quot;Connection failed.&quot;)
-      context stop self
+      context stop self // Stop actor if connection failed
+
+    // Connection succeeded 
+    case Connected(remote: InetSocketAddress, local: InetSocketAddress) =&gt; 
+      println(&quot;Connection succeeded!&quot;)
+  }
+}
+</code></pre>
+
+<p>To send or receive <code>TCP</code> messages we need to <code>Register</code> our <code>TwitchChatClient</code> actor to <code>Tcp</code> actor that we communicate with. After actor <code>Register</code> we can listen to incoming <code>TCP</code> messages, in out case we&rsquo;re gonna listen to <code>Received</code> and <code>ConnectionClosed</code> messages.</p>
+
+<pre><code class="language-java">class TwitchChatClient(remoteAddress: InetSocketAddress) extends Actor {
+
+  import context.system
+
+  println(s&quot;Connecting to ${remoteAddress.getHostName}:${remoteAddress.getPort}&quot;)
+
+  // Connecting to TCP with our supplied remote Address
+  IO(Tcp) ! Connect(remoteAddress = remoteAddress) 
+
+  def receive = {
+    // Connection failed
+    case CommandFailed(_: Connect) =&gt;
+      println(&quot;Connection failed.&quot;)
+      context stop self // Stop actor if connection failed
 
     // Connection succeeded 
     case Connected(remote: InetSocketAddress, local: InetSocketAddress) =&gt; 
       println(&quot;Connection succeeded!&quot;)
       val connection = sender()
-      connection ! Register(self)
+      connection ! Register(self) // Register our actor to TCP actor to send/receive messages
       // Change actor behaviour to handle Received &amp; ConnectionClosed messages
       context.become {
         case Received(data: ByteString) =&gt;
@@ -361,7 +523,7 @@ Connection succeeded!
 
 <p>At the moment we will <strong>hardcode</strong> our <code>NICK</code> sending to TCP client, but further into tutorial we&rsquo;ll write proper <em>nickname</em> handling .</p>
 
-<p>To <code>Write</code> messages to our TCP connect we need to use <code>Write(ByteString(&quot;message&quot;))</code> function that&rsquo;s accesible inside our <code>receive</code> handler.</p>
+<p>To <code>Write</code> messages to our TCP connect we need to use <code>Write(ByteString(&quot;message&quot;))</code> function that&rsquo;s accesible inside our actor.</p>
 
 <pre><code class="language-java">case Connected(remote: InetSocketAddress, local: InetSocketAddress) =&gt;
     println(&quot;Connection succeeded!&quot;)
@@ -378,7 +540,7 @@ Connection succeeded!
 }
 </code></pre>
 
-<p>Since IRC is <em>delimited</em> by <code>\r\n</code> characters we need to add them to the end of our commands, in this example we added it to the end of <code>NICK justinfan5123</code> message.</p>
+<p>Since IRC messages are <em>delimited</em> by <code>\r\n</code> characters (as seen in <code>BNF</code> format) we need to add them to the end of our commands, in this example we added it to the end of <code>NICK justinfan5123</code> message.</p>
 
 <p>Running our example we should see the initial Connection succeeded message + Welcome message from <code>tmi.twitch.tv</code></p>
 
@@ -412,7 +574,7 @@ Message: :tmi.twitch.tv 001 justinfan5123 :Welcome, GLHF!
 
 <p>Implementing <code>Nick</code> and <code>Join</code> commands</p>
 
-<pre><code class="language-java">object IrcClient {
+<pre><code class="language-java">object TwitchChatClient {
   case class Nick(message: String) extends IrcCommand(&quot;NICK&quot;) {
     override def getMessage: String = message
   }
@@ -438,7 +600,7 @@ Message: :tmi.twitch.tv 001 justinfan5123 :Welcome, GLHF!
 
 <p>Heres the code implementation</p>
 
-<pre><code class="language-java">class IrcClient(remoteAddress: InetSocketAddress) extends Actor with Stash {
+<pre><code class="language-java">class TwitchChatClient(remoteAddress: InetSocketAddress) extends Actor with Stash {
 
   import context.system
 
@@ -480,7 +642,7 @@ Message: :tmi.twitch.tv 001 justinfan5123 :Welcome, GLHF!
   val port = 6667
 
   val remoteAddress = new InetSocketAddress(host, port)
-  val props = Props(classOf[IrcClient], remoteAddress)
+  val props = Props(classOf[TwitchChatClient], remoteAddress)
 
   val tcpActor = actorSystem.actorOf(props)
 
@@ -522,7 +684,7 @@ case class CapCommands() extends IrcCommand(command = &quot;CAP REQ&quot;) {
 }
 </code></pre>
 
-<p>To send them we use them as regular actor messages.</p>
+<p>Sending our <code>CAP</code> request messages:</p>
 
 <pre><code class="language-java">tcpActor ! Nick(&quot;justinfan5123&quot;)
 tcpActor ! CapMembership()
@@ -540,7 +702,7 @@ Message: @badge-info=;badges=;color=;display-name=yuri_bezmenov_cx;emotes=357:0-
 Message: @badge-info=;badges=;color=;display-name=ezscaping;emotes=;flags=;id=dce1ede0-9d79-4e51-b8e1-bd4792032063;mod=0;room-id=26261471;subscriber=0;tmi-sent-ts=1559080977102;turbo=0;user-id=252590920;user-type= :ezscaping!ezscaping@ezscaping.tmi.twitch.tv PRIVMSG #asmongold :@Kalio666 :NEXOS
 </code></pre>
 
-<p>OK, we&rsquo;re done with part 1! Next time we&rsquo;ll implement incoming message parsing with <code>fastparser</code> and improve our <code>IrcMessage</code> handling logic with <code>Finite State Machine</code> implementation for our <code>IrcClient</code></p>
+<p>OK, we&rsquo;re done with part 1! Next time we&rsquo;ll implement incoming message parsing with <code>fastparser</code> and improve our <code>IrcMessage</code> handling logic with <code>Finite State Machine</code> implementation for our <code>TwitchChatClient</code></p>
 
 <hr />
 
@@ -562,7 +724,7 @@ abstract class IrcCommand(private val command: String) {
   }
 }
 
-object IrcClient {
+object TwitchChatClient {
   case class Nick(message: String) extends IrcCommand(&quot;NICK&quot;) {
     override def getMessage: String = message
   }
@@ -584,7 +746,7 @@ object IrcClient {
   }
 }
 
-class IrcClient(remoteAddress: InetSocketAddress) extends Actor with Stash {
+class TwitchChatClient(remoteAddress: InetSocketAddress) extends Actor with Stash {
 
   import context.system
 
@@ -623,7 +785,7 @@ object Main extends App {
 
   val remoteAddress = new InetSocketAddress(host, port)
 
-  val props = Props(classOf[IrcClient], remoteAddress)
+  val props = Props(classOf[TwitchChatClient], remoteAddress)
 
   val tcpActor = actorSystem.actorOf(props)
 
