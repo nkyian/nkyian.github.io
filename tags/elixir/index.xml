@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Elixir on NorbertKa</title>
+    <link>https://norbertka.me/tags/elixir/</link>
+    <description>Recent content in Elixir on NorbertKa</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 21 Jan 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://norbertka.me/tags/elixir/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>OTP - Akka comparison (part 1)</title>
+      <link>https://norbertka.me/posts/elixir-akka-comparision/</link>
+      <pubDate>Mon, 21 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/posts/elixir-akka-comparision/</guid>
+      <description>When we&amp;rsquo;re writing Akka actors we usually define receive function to process our incoming messages and save our state inside our extended Actor class
+class ExampleActor extends Actor { def receive = { case &amp;quot;A&amp;quot; =&amp;gt; println(&amp;quot;Received A&amp;quot;) case &amp;quot;B&amp;quot; =&amp;gt; println(&amp;quot;Received B&amp;quot;) case _ =&amp;gt; println(&amp;quot;Received unknown message&amp;quot;) } }  Using our ExampleActor:
+implicit val system = ActorSystem(&amp;quot;example-system&amp;quot;) val exampleActor = system.actorOf(Props[ExampleActor], &amp;quot;exampleActor) exampleActor ! &amp;quot;A&amp;quot; //=&amp;gt; Received A exampleActor !</description>
+    </item>
+    
+  </channel>
+</rss>

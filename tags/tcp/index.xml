@@ -6,10 +6,21 @@
     <description>Recent content in Tcp on NorbertKa</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 14 Apr 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 24 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://norbertka.me/tags/tcp/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Twitch chat Client (part 2) [DRAFT]</title>
+      <link>https://norbertka.me/posts/twitch-chat-client-part-2/</link>
+      <pubDate>Fri, 24 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/posts/twitch-chat-client-part-2/</guid>
+      <description>Introduction We already implemented simple Twitch.tv Chat client in part 1 of tutorial, now we&amp;rsquo;re going to parse incoming IRC messages into &amp;ldquo;manageable&amp;rdquo; classes.
+Remember the Backus–Naur form (BNF) form for IRC message format that we already saw in IRCv3 specification
+&amp;lt;message&amp;gt; ::= [&#39;@&#39; &amp;lt;tags&amp;gt; &amp;lt;SPACE&amp;gt;] [&#39;:&#39; &amp;lt;prefix&amp;gt; &amp;lt;SPACE&amp;gt; ] &amp;lt;command&amp;gt; &amp;lt;params&amp;gt; &amp;lt;crlf&amp;gt; &amp;lt;tags&amp;gt; ::= &amp;lt;tag&amp;gt; [&#39;;&#39; &amp;lt;tag&amp;gt;]* &amp;lt;tag&amp;gt; ::= &amp;lt;key&amp;gt; [&#39;=&#39; &amp;lt;escaped_value&amp;gt;] &amp;lt;key&amp;gt; ::= [ &amp;lt;client_prefix&amp;gt; ] [ &amp;lt;vendor&amp;gt; &#39;/&#39; ] &amp;lt;key_name&amp;gt; &amp;lt;client_prefix&amp;gt; ::= &#39;+&#39; &amp;lt;key_name&amp;gt; ::= &amp;lt;non-empty sequence of ascii letters, digits, hyphens (&#39;-&#39;)&amp;gt; &amp;lt;escaped_value&amp;gt; ::= &amp;lt;sequence of zero or more bytes except NUL, CR, LF, semicolon (`;`) and SPACE&amp;gt; &amp;lt;vendor&amp;gt; ::= &amp;lt;host&amp;gt;  This is the format that we will need to parse with fastparse library</description>
+    </item>
     
     <item>
       <title>Twitch chat Client (part 1)</title>

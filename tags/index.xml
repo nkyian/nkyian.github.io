@@ -6,24 +6,42 @@
     <description>Recent content in Tags on NorbertKa</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 14 Apr 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 21 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://norbertka.me/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Actor Model</title>
+      <link>https://norbertka.me/tags/actor-model/</link>
+      <pubDate>Mon, 21 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/tags/actor-model/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Akka</title>
       <link>https://norbertka.me/tags/akka/</link>
-      <pubDate>Sun, 14 Apr 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 24 May 2019 00:00:00 +0000</pubDate>
       
       <guid>https://norbertka.me/tags/akka/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>Elixir</title>
+      <link>https://norbertka.me/tags/elixir/</link>
+      <pubDate>Mon, 21 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/tags/elixir/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Irc</title>
       <link>https://norbertka.me/tags/irc/</link>
-      <pubDate>Sun, 14 Apr 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 24 May 2019 00:00:00 +0000</pubDate>
       
       <guid>https://norbertka.me/tags/irc/</guid>
       <description></description>
@@ -32,7 +50,7 @@
     <item>
       <title>Parsing</title>
       <link>https://norbertka.me/tags/parsing/</link>
-      <pubDate>Sun, 14 Apr 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 24 May 2019 00:00:00 +0000</pubDate>
       
       <guid>https://norbertka.me/tags/parsing/</guid>
       <description></description>
@@ -41,7 +59,7 @@
     <item>
       <title>Scala</title>
       <link>https://norbertka.me/tags/scala/</link>
-      <pubDate>Sun, 14 Apr 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 24 May 2019 00:00:00 +0000</pubDate>
       
       <guid>https://norbertka.me/tags/scala/</guid>
       <description></description>
@@ -50,7 +68,7 @@
     <item>
       <title>Tcp</title>
       <link>https://norbertka.me/tags/tcp/</link>
-      <pubDate>Sun, 14 Apr 2019 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 24 May 2019 00:00:00 +0000</pubDate>
       
       <guid>https://norbertka.me/tags/tcp/</guid>
       <description></description>

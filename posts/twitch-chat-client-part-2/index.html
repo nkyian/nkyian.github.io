@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Twitch chat Client (part 2) [DRAFT] :: NorbertKa — Personal blog</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="Introduction We already implemented simple Twitch.tv Chat client in part 1 of tutorial, now we&amp;rsquo;re going to parse incoming IRC messages into &amp;ldquo;manageable&amp;rdquo; classes.
+Remember the Backus–Naur form (BNF) form for IRC message format that we already saw in IRCv3 specification
+&amp;lt;message&amp;gt; ::= [&#39;@&#39; &amp;lt;tags&amp;gt; &amp;lt;SPACE&amp;gt;] [&#39;:&#39; &amp;lt;prefix&amp;gt; &amp;lt;SPACE&amp;gt; ] &amp;lt;command&amp;gt; &amp;lt;params&amp;gt; &amp;lt;crlf&amp;gt; &amp;lt;tags&amp;gt; ::= &amp;lt;tag&amp;gt; [&#39;;&#39; &amp;lt;tag&amp;gt;]* &amp;lt;tag&amp;gt; ::= &amp;lt;key&amp;gt; [&#39;=&#39; &amp;lt;escaped_value&amp;gt;] &amp;lt;key&amp;gt; ::= [ &amp;lt;client_prefix&amp;gt; ] [ &amp;lt;vendor&amp;gt; &#39;/&#39; ] &amp;lt;key_name&amp;gt; &amp;lt;client_prefix&amp;gt; ::= &#39;&#43;&#39; &amp;lt;key_name&amp;gt; ::= &amp;lt;non-empty sequence of ascii letters, digits, hyphens (&#39;-&#39;)&amp;gt; &amp;lt;escaped_value&amp;gt; ::= &amp;lt;sequence of zero or more bytes except NUL, CR, LF, semicolon (`;`) and SPACE&amp;gt; &amp;lt;vendor&amp;gt; ::= &amp;lt;host&amp;gt;  This is the format that we will need to parse with fastparse library"/>
+<meta name="keywords" content=""/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://norbertka.me/posts/twitch-chat-client-part-2/" />
+
+
+<link rel="stylesheet" href="https://norbertka.me/assets/style.css">
+
+  <link rel="stylesheet" href="https://norbertka.me/assets/red.css">
+
+
+<link rel="stylesheet" type="text/css" href="https://norbertka.me/css/asciinema-player.css" />
+
+
+<link rel="stylesheet" href="https://norbertka.me/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://norbertka.me/img/apple-touch-icon-144-precomposed.png">
+
+<link rel="shortcut icon" href="https://norbertka.me/img/favicon/red.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Twitch chat Client (part 2) [DRAFT] :: NorbertKa — Personal blog" />
+<meta name="twitter:description" content="Introduction We already implemented simple Twitch.tv Chat client in part 1 of tutorial, now we&amp;rsquo;re going to parse incoming IRC messages into &amp;ldquo;manageable&amp;rdquo; classes.
+Remember the Backus–Naur form (BNF) form for IRC message format that we already saw in IRCv3 specification
+&amp;lt;message&amp;gt; ::= [&#39;@&#39; &amp;lt;tags&amp;gt; &amp;lt;SPACE&amp;gt;] [&#39;:&#39; &amp;lt;prefix&amp;gt; &amp;lt;SPACE&amp;gt; ] &amp;lt;command&amp;gt; &amp;lt;params&amp;gt; &amp;lt;crlf&amp;gt; &amp;lt;tags&amp;gt; ::= &amp;lt;tag&amp;gt; [&#39;;&#39; &amp;lt;tag&amp;gt;]* &amp;lt;tag&amp;gt; ::= &amp;lt;key&amp;gt; [&#39;=&#39; &amp;lt;escaped_value&amp;gt;] &amp;lt;key&amp;gt; ::= [ &amp;lt;client_prefix&amp;gt; ] [ &amp;lt;vendor&amp;gt; &#39;/&#39; ] &amp;lt;key_name&amp;gt; &amp;lt;client_prefix&amp;gt; ::= &#39;&#43;&#39; &amp;lt;key_name&amp;gt; ::= &amp;lt;non-empty sequence of ascii letters, digits, hyphens (&#39;-&#39;)&amp;gt; &amp;lt;escaped_value&amp;gt; ::= &amp;lt;sequence of zero or more bytes except NUL, CR, LF, semicolon (`;`) and SPACE&amp;gt; &amp;lt;vendor&amp;gt; ::= &amp;lt;host&amp;gt;  This is the format that we will need to parse with fastparse library" />
+<meta name="twitter:site" content="https://norbertka.me/" />
+<meta name="twitter:creator" content="Norberts Kakste" />
+<meta name="twitter:image" content="">
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Twitch chat Client (part 2) [DRAFT] :: NorbertKa — Personal blog">
+<meta property="og:description" content="Introduction We already implemented simple Twitch.tv Chat client in part 1 of tutorial, now we&amp;rsquo;re going to parse incoming IRC messages into &amp;ldquo;manageable&amp;rdquo; classes.
+Remember the Backus–Naur form (BNF) form for IRC message format that we already saw in IRCv3 specification
+&amp;lt;message&amp;gt; ::= [&#39;@&#39; &amp;lt;tags&amp;gt; &amp;lt;SPACE&amp;gt;] [&#39;:&#39; &amp;lt;prefix&amp;gt; &amp;lt;SPACE&amp;gt; ] &amp;lt;command&amp;gt; &amp;lt;params&amp;gt; &amp;lt;crlf&amp;gt; &amp;lt;tags&amp;gt; ::= &amp;lt;tag&amp;gt; [&#39;;&#39; &amp;lt;tag&amp;gt;]* &amp;lt;tag&amp;gt; ::= &amp;lt;key&amp;gt; [&#39;=&#39; &amp;lt;escaped_value&amp;gt;] &amp;lt;key&amp;gt; ::= [ &amp;lt;client_prefix&amp;gt; ] [ &amp;lt;vendor&amp;gt; &#39;/&#39; ] &amp;lt;key_name&amp;gt; &amp;lt;client_prefix&amp;gt; ::= &#39;&#43;&#39; &amp;lt;key_name&amp;gt; ::= &amp;lt;non-empty sequence of ascii letters, digits, hyphens (&#39;-&#39;)&amp;gt; &amp;lt;escaped_value&amp;gt; ::= &amp;lt;sequence of zero or more bytes except NUL, CR, LF, semicolon (`;`) and SPACE&amp;gt; &amp;lt;vendor&amp;gt; ::= &amp;lt;host&amp;gt;  This is the format that we will need to parse with fastparse library" />
+<meta property="og:url" content="https://norbertka.me/posts/twitch-chat-client-part-2/" />
+<meta property="og:site_name" content="Twitch chat Client (part 2) [DRAFT]" />
+<meta property="og:image" content="">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+<meta property="article:published_time" content="2019-05-24 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="">
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    NorbertKa
+  </div>
+</a>
+
+    </div>
+    <div class="menu-trigger">menu</div>
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/cv">CV</a></li>
+        
+      
+        
+          <li><a href="https://github.com/nkyian">Github</a></li>
+        
+      
+        
+          <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
+        
+      
+        
+          <li><a href="/showcase">Showcase</a></li>
+        
+      
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/cv">CV</a></li>
+      
+    
+      
+        <li><a href="https://github.com/nkyian">Github</a></li>
+      
+    
+      
+        <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
+      
+    
+      
+        <li><a href="/showcase">Showcase</a></li>
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://norbertka.me/posts/twitch-chat-client-part-2/">Twitch chat Client (part 2) [DRAFT]</a></h1>
+  <div class="post-meta">
+    <span class="post-date">
+      2019-05-24
+    </span>
+    
+    <span class="post-author">::
+      Norberts Kakste
+    </span>
+    
+  </div>
+
+  
+  <span class="post-tags">
+    
+    #<a href="https://norbertka.me/tags/scala/">scala</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/akka/">akka</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/parsing/">parsing</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/irc/">irc</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/tcp/">tcp</a>&nbsp;
+    
+  </span>
+  
+
+  
+
+  <div class="post-content">
+    
+
+<h4 id="introduction">Introduction</h4>
+
+<p>We already implemented simple <code>Twitch.tv</code> Chat client in part 1 of tutorial, now we&rsquo;re going to parse incoming <code>IRC</code> messages into <strong>&ldquo;manageable&rdquo;</strong> classes.</p>
+
+<p>Remember the <a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">Backus–Naur form</a> (BNF) form for <code>IRC</code> message format that we already saw in <a href="https://ircv3.net/specs/extensions/message-tags.html"><code>IRCv3</code></a> specification</p>
+
+<pre><code>&lt;message&gt;       ::= ['@' &lt;tags&gt; &lt;SPACE&gt;] [':' &lt;prefix&gt; &lt;SPACE&gt; ] &lt;command&gt; &lt;params&gt; &lt;crlf&gt;
+&lt;tags&gt;          ::= &lt;tag&gt; [';' &lt;tag&gt;]*
+&lt;tag&gt;           ::= &lt;key&gt; ['=' &lt;escaped_value&gt;]
+&lt;key&gt;           ::= [ &lt;client_prefix&gt; ] [ &lt;vendor&gt; '/' ] &lt;key_name&gt;
+&lt;client_prefix&gt; ::= '+'
+&lt;key_name&gt;      ::= &lt;non-empty sequence of ascii letters, digits, hyphens ('-')&gt;
+&lt;escaped_value&gt; ::= &lt;sequence of zero or more bytes except NUL, CR, LF, semicolon (`;`) and SPACE&gt;
+&lt;vendor&gt;        ::= &lt;host&gt;
+</code></pre>
+
+<p>This is the <code>format</code> that we will need to parse with <code>fastparse</code> library</p>
+
+<h4 id="parsing">Parsing</h4>
+
+<p>First of all we need to import new library into our project <code>&quot;com.lihaoyi&quot; %% &quot;fastparse&quot; % &quot;2.1.0&quot;</code>, so our <code>build.sbt</code> now looks like this:</p>
+
+<pre><code class="language-java">name := &quot;IrcClient&quot;
+
+version := &quot;0.1&quot;
+
+scalaVersion := &quot;2.12.8&quot;
+
+libraryDependencies ++= Seq(
+  &quot;com.typesafe.akka&quot; %% &quot;akka-actor&quot; % &quot;2.5.23&quot;,
+  &quot;com.lihaoyi&quot; %% &quot;fastparse&quot; % &quot;2.1.0&quot;
+)
+</code></pre>
+
+  </div>
+  
+  <div class="pagination">
+    <div class="pagination__title">
+      <span
+        class="pagination__title-h">Read other posts</span>
+      <hr />
+    </div>
+    <div class="pagination__buttons">
+      
+      
+      <span class="button next">
+        <a href="https://norbertka.me/posts/twitch-chat-client-part-1/">
+          <span class="button__text">Twitch chat Client (part 1)</span>
+          <span class="button__icon">→</span>
+        </a>
+      </span>
+      
+    </div>
+  </div>
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2019 Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+    
+  </div>
+</footer>
+
+<script src="https://norbertka.me/assets/main.js"></script>
+<script src="https://norbertka.me/assets/prism.js"></script>
+<script src="https://norbertka.me/js/asciinema-player.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

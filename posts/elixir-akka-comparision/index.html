@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>OTP - Akka comparison (part 1) :: NorbertKa — Personal blog</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="When we&amp;rsquo;re writing Akka actors we usually define receive function to process our incoming messages and save our state inside our extended Actor class
+class ExampleActor extends Actor { def receive = { case &amp;quot;A&amp;quot; =&amp;gt; println(&amp;quot;Received A&amp;quot;) case &amp;quot;B&amp;quot; =&amp;gt; println(&amp;quot;Received B&amp;quot;) case _ =&amp;gt; println(&amp;quot;Received unknown message&amp;quot;) } }  Using our ExampleActor:
+implicit val system = ActorSystem(&amp;quot;example-system&amp;quot;) val exampleActor = system.actorOf(Props[ExampleActor], &amp;quot;exampleActor) exampleActor ! &amp;quot;A&amp;quot; //=&amp;gt; Received A exampleActor !"/>
+<meta name="keywords" content=""/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://norbertka.me/posts/elixir-akka-comparision/" />
+
+
+<link rel="stylesheet" href="https://norbertka.me/assets/style.css">
+
+  <link rel="stylesheet" href="https://norbertka.me/assets/red.css">
+
+
+<link rel="stylesheet" type="text/css" href="https://norbertka.me/css/asciinema-player.css" />
+
+
+<link rel="stylesheet" href="https://norbertka.me/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://norbertka.me/img/apple-touch-icon-144-precomposed.png">
+
+<link rel="shortcut icon" href="https://norbertka.me/img/favicon/red.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="OTP - Akka comparison (part 1) :: NorbertKa — Personal blog" />
+<meta name="twitter:description" content="When we&amp;rsquo;re writing Akka actors we usually define receive function to process our incoming messages and save our state inside our extended Actor class
+class ExampleActor extends Actor { def receive = { case &amp;quot;A&amp;quot; =&amp;gt; println(&amp;quot;Received A&amp;quot;) case &amp;quot;B&amp;quot; =&amp;gt; println(&amp;quot;Received B&amp;quot;) case _ =&amp;gt; println(&amp;quot;Received unknown message&amp;quot;) } }  Using our ExampleActor:
+implicit val system = ActorSystem(&amp;quot;example-system&amp;quot;) val exampleActor = system.actorOf(Props[ExampleActor], &amp;quot;exampleActor) exampleActor ! &amp;quot;A&amp;quot; //=&amp;gt; Received A exampleActor !" />
+<meta name="twitter:site" content="https://norbertka.me/" />
+<meta name="twitter:creator" content="Norberts Kakste" />
+<meta name="twitter:image" content="">
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="OTP - Akka comparison (part 1) :: NorbertKa — Personal blog">
+<meta property="og:description" content="When we&amp;rsquo;re writing Akka actors we usually define receive function to process our incoming messages and save our state inside our extended Actor class
+class ExampleActor extends Actor { def receive = { case &amp;quot;A&amp;quot; =&amp;gt; println(&amp;quot;Received A&amp;quot;) case &amp;quot;B&amp;quot; =&amp;gt; println(&amp;quot;Received B&amp;quot;) case _ =&amp;gt; println(&amp;quot;Received unknown message&amp;quot;) } }  Using our ExampleActor:
+implicit val system = ActorSystem(&amp;quot;example-system&amp;quot;) val exampleActor = system.actorOf(Props[ExampleActor], &amp;quot;exampleActor) exampleActor ! &amp;quot;A&amp;quot; //=&amp;gt; Received A exampleActor !" />
+<meta property="og:url" content="https://norbertka.me/posts/elixir-akka-comparision/" />
+<meta property="og:site_name" content="OTP - Akka comparison (part 1)" />
+<meta property="og:image" content="">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+<meta property="article:published_time" content="2019-01-21 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="">
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    NorbertKa
+  </div>
+</a>
+
+    </div>
+    <div class="menu-trigger">menu</div>
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/cv">CV</a></li>
+        
+      
+        
+          <li><a href="https://github.com/nkyian">Github</a></li>
+        
+      
+        
+          <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
+        
+      
+        
+          <li><a href="/showcase">Showcase</a></li>
+        
+      
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/cv">CV</a></li>
+      
+    
+      
+        <li><a href="https://github.com/nkyian">Github</a></li>
+      
+    
+      
+        <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
+      
+    
+      
+        <li><a href="/showcase">Showcase</a></li>
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://norbertka.me/posts/elixir-akka-comparision/">OTP - Akka comparison (part 1)</a></h1>
+  <div class="post-meta">
+    <span class="post-date">
+      2019-01-21
+    </span>
+    
+    <span class="post-author">::
+      Norberts Kakste
+    </span>
+    
+  </div>
+
+  
+  <span class="post-tags">
+    
+    #<a href="https://norbertka.me/tags/elixir/">elixir</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/scala/">scala</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/akka/">akka</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/actor-model/">actor model</a>&nbsp;
+    
+  </span>
+  
+
+  
+
+  <div class="post-content">
+    <p>When we&rsquo;re writing <code>Akka</code> actors we usually define <code>receive</code> function to process our incoming <code>messages</code> and save our state inside our extended <code>Actor</code> class</p>
+
+<pre><code class="language-java">class ExampleActor extends Actor {
+  def receive = {
+    case &quot;A&quot; =&gt; println(&quot;Received A&quot;)
+    case &quot;B&quot; =&gt; println(&quot;Received B&quot;)
+    case _ =&gt; println(&quot;Received unknown message&quot;)
+  }
+}
+</code></pre>
+
+<p>Using our <code>ExampleActor</code>:</p>
+
+<pre><code class="language-java">implicit val system = ActorSystem(&quot;example-system&quot;)
+
+val exampleActor = system.actorOf(Props[ExampleActor], &quot;exampleActor)
+
+exampleActor ! &quot;A&quot;
+//=&gt; Received A
+
+exampleActor ! &quot;B&quot;
+//=&gt; Received B
+
+exampleActor ! &quot;C&quot;
+//=&gt; Received unknown message
+</code></pre>
+
+<p>Here we can handle two different messages in our <code>ExampleActor</code>, those would be <code>&quot;A&quot;</code> and <code>&quot;B&quot;</code> if we send something else, like <code>&quot;C&quot;</code> its&rsquo; gonna use our <strong>&ldquo;default&rdquo;</strong> <code>_</code> case to process unknown messages.</p>
+
+<p>In elixir equivalent would be a simple <code>GenServer</code></p>
+
+<pre><code class="language-elixir">defmodule ExampleGenserver do
+    use GenServer
+
+    def init(_) do
+        {:ok, nil}
+    end
+
+    def handle_call(&quot;A&quot;, _from, state) do
+        {:reply, &quot;Received A&quot;, state)}
+    end
+
+    def handle_call(&quot;B&quot;, _from, state) do
+        {:reply, &quot;Received B&quot;, state)}
+    end
+
+    def handle_call(default, _from, state) do
+        {:reply, &quot;Received unknown message&quot;, state)}
+    end
+end
+</code></pre>
+
+<p>Using our <code>ExampleGenserver</code>:</p>
+
+<pre><code class="language-elixir">{:ok, pid} = GenServer.start_link(ExampleGenserver, nil)
+
+GenServer.call(pid, &quot;A&quot;)
+#=&gt; Received A
+
+GenServer.call(pid, &quot;B&quot;)
+#=&gt; Received B
+
+GenServer.call(pid, &quot;C&quot;)
+#=&gt; Received unknown message
+</code></pre>
+
+<p>As you can see code is quite similar and the underlying logic is even closer that the code. We create <code>ExampleActor</code> in scala that handles <code>&quot;A&quot;</code> and <code>&quot;B&quot;</code> and do the same in our <code>ExampleGenserver</code> in elixir</p>
+
+<p>Now to explore internal state handling inside our <code>actors</code> we&rsquo;re going to write simple <code>Stack</code> implementation if you&rsquo;ve forgotten what <code>Stack</code> is <a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)">HERES</a> an Wikipedia article about <code>Stack</code> data type</p>
+
+<p>Scala code:</p>
+
+<pre><code class="language-java">object StackActor {
+    case class Push(value: Int) // Push value into our stack
+    case class Pop() // Pop value from our stack
+
+class StackActor extends Actor {
+  var stack = new mutable.Stack[Int] // Stack of intergers
+
+  def receive = {
+    // Handle Push(value: Int) [Insert value]
+    case Push(value: Int) =&gt; 
+      stack.push(value)
+    // Handle Pop() [Value return]
+    case Pop() =&gt; 
+      sender ! stack.pop()
+    case _ =&gt; println(&quot;Received unknown message&quot;)
+  }
+}
+</code></pre>
+
+<p>Using our <code>StackActor</code>:</p>
+
+<pre><code class="language-java">implicit val system = ActorSystem(&quot;stack-system&quot;)
+
+val stackActor = system.actorOf(Props[StackActor], &quot;stackActor&quot;)
+
+// Push values into our stack
+stackActor ! Push(1)
+stackActor ! Push(2)
+stackActor ! Push(3)
+stackActor ! Push(4)
+stackActor ! Push(5)
+
+// Pop last value [5]
+val popFuture = stackActor ! Pop()
+
+// Handle future states
+popFuture.onComplete {
+    case Success(poppedValue) =&gt; println(poppedValue)
+    case Failure(t) =&gt; println(&quot;An error has occurred: &quot; + t.getMessage)
+}
+</code></pre>
+
+<p>Elixir code:</p>
+
+<pre><code class="language-elixir">defmodule Stack do
+  use GenServer
+
+  def start_link(_ignore) do
+    GenServer.start_link(__MODULE__, [])
+  end
+
+  def push(pid, item) do
+    GenServer.cast(pid, {:push, item})
+  end
+
+  def pop(pid) do
+    GenServer.call(pid, :pop)
+  end
+
+  # Server (callbacks)
+
+  def init(stack) do
+    {:ok, stack}
+  end
+
+  def handle_call(:pop, _from, [head | tail]) do
+    {:reply, head, tail}
+  end
+
+  def handle_cast({:push, item}, state) do
+    {:noreply, [item | state]}
+  end
+end
+</code></pre>
+
+<p>Using our <code>Stack</code>:</p>
+
+<pre><code class="language-elixir">{:ok, pid} = GenServer.start_link(Stack, nil)
+
+Stack.push(pid, 1)
+Stack.push(pid, 2)
+Stack.push(pid, 3)
+Stack.push(pid, 4)
+Stack.push(pid, 5)
+
+popped_value = Stack.pop(pid)
+</code></pre>
+
+  </div>
+  
+  <div class="pagination">
+    <div class="pagination__title">
+      <span
+        class="pagination__title-h">Read other posts</span>
+      <hr />
+    </div>
+    <div class="pagination__buttons">
+      
+      <span class="button previous">
+        <a href="https://norbertka.me/posts/twitch-chat-client-part-1/">
+          <span class="button__icon">←</span>
+          <span class="button__text">Twitch chat Client (part 1)</span>
+        </a>
+      </span>
+      
+      
+    </div>
+  </div>
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2019 Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+    
+  </div>
+</footer>
+
+<script src="https://norbertka.me/assets/main.js"></script>
+<script src="https://norbertka.me/assets/prism.js"></script>
+<script src="https://norbertka.me/js/asciinema-player.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

@@ -6,10 +6,21 @@
     <description>Recent content in Akka on NorbertKa</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 14 Apr 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 24 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://norbertka.me/tags/akka/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Twitch chat Client (part 2) [DRAFT]</title>
+      <link>https://norbertka.me/posts/twitch-chat-client-part-2/</link>
+      <pubDate>Fri, 24 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/posts/twitch-chat-client-part-2/</guid>
+      <description>Introduction We already implemented simple Twitch.tv Chat client in part 1 of tutorial, now we&amp;rsquo;re going to parse incoming IRC messages into &amp;ldquo;manageable&amp;rdquo; classes.
+Remember the Backus–Naur form (BNF) form for IRC message format that we already saw in IRCv3 specification
+&amp;lt;message&amp;gt; ::= [&#39;@&#39; &amp;lt;tags&amp;gt; &amp;lt;SPACE&amp;gt;] [&#39;:&#39; &amp;lt;prefix&amp;gt; &amp;lt;SPACE&amp;gt; ] &amp;lt;command&amp;gt; &amp;lt;params&amp;gt; &amp;lt;crlf&amp;gt; &amp;lt;tags&amp;gt; ::= &amp;lt;tag&amp;gt; [&#39;;&#39; &amp;lt;tag&amp;gt;]* &amp;lt;tag&amp;gt; ::= &amp;lt;key&amp;gt; [&#39;=&#39; &amp;lt;escaped_value&amp;gt;] &amp;lt;key&amp;gt; ::= [ &amp;lt;client_prefix&amp;gt; ] [ &amp;lt;vendor&amp;gt; &#39;/&#39; ] &amp;lt;key_name&amp;gt; &amp;lt;client_prefix&amp;gt; ::= &#39;+&#39; &amp;lt;key_name&amp;gt; ::= &amp;lt;non-empty sequence of ascii letters, digits, hyphens (&#39;-&#39;)&amp;gt; &amp;lt;escaped_value&amp;gt; ::= &amp;lt;sequence of zero or more bytes except NUL, CR, LF, semicolon (`;`) and SPACE&amp;gt; &amp;lt;vendor&amp;gt; ::= &amp;lt;host&amp;gt;  This is the format that we will need to parse with fastparse library</description>
+    </item>
     
     <item>
       <title>Twitch chat Client (part 1)</title>
@@ -20,6 +31,17 @@
       <description>Introduction In this 3 part tutorial series we&amp;rsquo;re going to explore TCP Connection handling; IRCv3 message parsing and connection handling for Twitch.tv Chat. Here in first part of the tutorial we&amp;rsquo;re going to implement IRC protocol Client for our Twitch.tv Chat Client.
 Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research First of all, we should start with research:
  How to connect to IRC server How to send IRC messages.</description>
+    </item>
+    
+    <item>
+      <title>OTP - Akka comparison (part 1)</title>
+      <link>https://norbertka.me/posts/elixir-akka-comparision/</link>
+      <pubDate>Mon, 21 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/posts/elixir-akka-comparision/</guid>
+      <description>When we&amp;rsquo;re writing Akka actors we usually define receive function to process our incoming messages and save our state inside our extended Actor class
+class ExampleActor extends Actor { def receive = { case &amp;quot;A&amp;quot; =&amp;gt; println(&amp;quot;Received A&amp;quot;) case &amp;quot;B&amp;quot; =&amp;gt; println(&amp;quot;Received B&amp;quot;) case _ =&amp;gt; println(&amp;quot;Received unknown message&amp;quot;) } }  Using our ExampleActor:
+implicit val system = ActorSystem(&amp;quot;example-system&amp;quot;) val exampleActor = system.actorOf(Props[ExampleActor], &amp;quot;exampleActor) exampleActor ! &amp;quot;A&amp;quot; //=&amp;gt; Received A exampleActor !</description>
     </item>
     
   </channel>

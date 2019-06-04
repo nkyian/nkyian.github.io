@@ -19,6 +19,8 @@ Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research Fir
   <link rel="stylesheet" href="https://norbertka.me/assets/red.css">
 
 
+<link rel="stylesheet" type="text/css" href="https://norbertka.me/css/asciinema-player.css" />
+
 
 <link rel="stylesheet" href="https://norbertka.me/style.css">
 
@@ -91,6 +93,18 @@ Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research Fir
         
       
         
+          <li><a href="/cv">CV</a></li>
+        
+      
+        
+          <li><a href="https://github.com/nkyian">Github</a></li>
+        
+      
+        
+          <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
+        
+      
+        
           <li><a href="/showcase">Showcase</a></li>
         
       
@@ -102,6 +116,18 @@ Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research Fir
     
       
         <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/cv">CV</a></li>
+      
+    
+      
+        <li><a href="https://github.com/nkyian">Github</a></li>
+      
+    
+      
+        <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
       
     
       
@@ -588,13 +614,15 @@ Message: :tmi.twitch.tv 001 justinfan5123 :Welcome, GLHF!
 
 <p>Now we need to handle our custom <code>Nick</code> and <code>Join</code> commands inside our <code>IrcClient</code> actor, we could put them in our receive function <strong>but</strong> we need to think about our <code>Connected</code> logic carefully. If we&rsquo;re gonna send <code>Nick</code> message to our actor what guarantees that our connection will be open?</p>
 
+<p>If we handle our incoming messages in base <code>receive</code></p>
+
 <p>Here&rsquo;s an simple diagram that shows our message queue</p>
 
-<p><img src="/no_stash.svg" alt="Example image" /></p>
+<p><img src="/no_stash_diagram.svg" alt="Example image" /></p>
 
 <p>You can see that when we send our <code>Nick</code> and <code>Join</code> messages they&rsquo;re not guarranted to be after <code>Connected</code> message, and knowing that opening <code>TCP</code> connection is probably slower than sending message to actor, we can be sure that our <strong>connection</strong> won&rsquo;t be established when we send our <code>Nick</code> and <code>Join</code> messages. So how can we bypass this limitation? With <code>stash</code> trait; we can <code>stash</code> our unhandable <strong>messages</strong> untill our <strong>connection</strong> is open.</p>
 
-<p><img src="/stash.svg" alt="Example image" /></p>
+<p><img src="/stash_diagram.svg" alt="Example image" /></p>
 
 <p>Here I visualized stashing process, we sent <code>Nick</code> and <code>Join</code> commands, but they are <code>stashed()</code> before <code>Connected</code> is finished, when it&rsquo;s finished we can <code>unstash()</code> them and process them further.</p>
 
@@ -710,13 +738,13 @@ Message: @badge-info=;badges=;color=;display-name=ezscaping;emotes=;flags=;id=dc
 
 <pre><code class="language-java">import java.net.InetSocketAddress
 
-import IrcClient._
+import TwitchChatClient._
 import akka.actor.{Actor, ActorSystem, Props, Stash}
 import akka.io.Tcp._
 import akka.io.{IO, Tcp}
 import akka.util.ByteString
 
-abstract class IrcCommand(private val command: String) {
+abstract class TwitchChatClient(private val command: String) {
   def getMessage: String
 
   def getCommand: ByteString = {
@@ -807,6 +835,32 @@ object Main extends App {
 
   </div>
   
+  <div class="pagination">
+    <div class="pagination__title">
+      <span
+        class="pagination__title-h">Read other posts</span>
+      <hr />
+    </div>
+    <div class="pagination__buttons">
+      
+      <span class="button previous">
+        <a href="https://norbertka.me/posts/twitch-chat-client-part-2/">
+          <span class="button__icon">←</span>
+          <span class="button__text">Twitch chat Client (part 2) [DRAFT]</span>
+        </a>
+      </span>
+      
+      
+      <span class="button next">
+        <a href="https://norbertka.me/posts/elixir-akka-comparision/">
+          <span class="button__text">OTP - Akka comparison (part 1)</span>
+          <span class="button__icon">→</span>
+        </a>
+      </span>
+      
+    </div>
+  </div>
+  
 
   
 
@@ -828,6 +882,7 @@ object Main extends App {
 
 <script src="https://norbertka.me/assets/main.js"></script>
 <script src="https://norbertka.me/assets/prism.js"></script>
+<script src="https://norbertka.me/js/asciinema-player.js"></script>
 
 
 
