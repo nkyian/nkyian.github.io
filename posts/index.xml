@@ -34,6 +34,20 @@ Prerequisites  Basic understanding of TCP Protocol and Akka actors  Research Fir
     </item>
     
     <item>
+      <title>Dynamic gen_stage producers</title>
+      <link>https://norbertka.me/posts/dynamic_genstage_producers/</link>
+      <pubDate>Thu, 21 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/posts/dynamic_genstage_producers/</guid>
+      <description>Recently I discovered that dealing with dynamic gen_stage producers is quite tricky, since you need to manage their supervision, subscription and de-subscription, while also handling their failure gracefully.
+To start with this project create new mix project with:
+mix new dynamic_producer_tutorial --sup
+It&amp;rsquo;s going to create new mix project with default supervision tree, now to finish add gen_stage to our mix.exs dependencies with:
+{:gen_stage, &amp;quot;~&amp;gt; 0.14&amp;quot;}
+and update your project with mix deps.</description>
+    </item>
+    
+    <item>
       <title>OTP - Akka comparison (part 1)</title>
       <link>https://norbertka.me/posts/elixir-akka-comparision/</link>
       <pubDate>Mon, 21 Jan 2019 00:00:00 +0000</pubDate>

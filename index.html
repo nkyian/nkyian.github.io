@@ -234,6 +234,54 @@
   
   <div class="post on-list">
     <h1 class="post-title">
+      <a href="https://norbertka.me/posts/dynamic_genstage_producers/">Dynamic gen_stage producers</a></h1>
+    <div class="post-meta">
+      <span class="post-date">
+        2019-02-21
+      </span>
+      <span class="post-author">::
+        Norberts Kakste</span>
+    </div>
+
+    
+    <span class="post-tags">
+      
+      #<a href="https://norbertka.me/tags/elixir/">elixir</a>&nbsp;
+      
+      #<a href="https://norbertka.me/tags/gen_stage/">gen_stage</a>&nbsp;
+      
+      #<a href="https://norbertka.me/tags/streaming/">streaming</a>&nbsp;
+      
+      #<a href="https://norbertka.me/tags/events/">events</a>&nbsp;
+      
+    </span>
+    
+
+    
+
+    <div class="post-content">
+      
+      
+      Recently I discovered that dealing with dynamic gen_stage producers is quite tricky, since you need to manage their supervision, subscription and de-subscription, while also handling their failure gracefully.
+To start with this project create new mix project with:
+mix new dynamic_producer_tutorial &ndash;sup
+It&rsquo;s going to create new mix project with default supervision tree, now to finish add gen_stage to our mix.exs dependencies with:
+{:gen_stage, &quot;~&gt; 0.14&quot;}
+and update your project with mix deps.
+      
+      
+    </div>
+
+    
+    <div>
+      <a class="read-more button"
+        href="/posts/dynamic_genstage_producers/">Read more →</a>
+    </div>
+    
+  </div>
+  
+  <div class="post on-list">
+    <h1 class="post-title">
       <a href="https://norbertka.me/posts/elixir-akka-comparision/">OTP - Akka comparison (part 1)</a></h1>
     <div class="post-meta">
       <span class="post-date">

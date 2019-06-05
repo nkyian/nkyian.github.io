@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Dynamic gen_stage producers :: NorbertKa — Personal blog</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="Recently I discovered that dealing with dynamic gen_stage producers is quite tricky, since you need to manage their supervision, subscription and de-subscription, while also handling their failure gracefully.
+To start with this project create new mix project with:
+mix new dynamic_producer_tutorial --sup
+It&amp;rsquo;s going to create new mix project with default supervision tree, now to finish add gen_stage to our mix.exs dependencies with:
+{:gen_stage, &amp;quot;~&amp;gt; 0.14&amp;quot;}
+and update your project with mix deps."/>
+<meta name="keywords" content=""/>
+<meta name="robots" content="noodp"/>
+<link rel="canonical" href="https://norbertka.me/posts/dynamic_genstage_producers/" />
+
+
+<link rel="stylesheet" href="https://norbertka.me/assets/style.css">
+
+  <link rel="stylesheet" href="https://norbertka.me/assets/red.css">
+
+
+<link rel="stylesheet" type="text/css" href="https://norbertka.me/css/asciinema-player.css" />
+
+
+<link rel="stylesheet" href="https://norbertka.me/style.css">
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://norbertka.me/img/apple-touch-icon-144-precomposed.png">
+
+<link rel="shortcut icon" href="https://norbertka.me/img/favicon/red.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Dynamic gen_stage producers :: NorbertKa — Personal blog" />
+<meta name="twitter:description" content="Recently I discovered that dealing with dynamic gen_stage producers is quite tricky, since you need to manage their supervision, subscription and de-subscription, while also handling their failure gracefully.
+To start with this project create new mix project with:
+mix new dynamic_producer_tutorial --sup
+It&amp;rsquo;s going to create new mix project with default supervision tree, now to finish add gen_stage to our mix.exs dependencies with:
+{:gen_stage, &amp;quot;~&amp;gt; 0.14&amp;quot;}
+and update your project with mix deps." />
+<meta name="twitter:site" content="https://norbertka.me/" />
+<meta name="twitter:creator" content="Norberts Kakste" />
+<meta name="twitter:image" content="">
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Dynamic gen_stage producers :: NorbertKa — Personal blog">
+<meta property="og:description" content="Recently I discovered that dealing with dynamic gen_stage producers is quite tricky, since you need to manage their supervision, subscription and de-subscription, while also handling their failure gracefully.
+To start with this project create new mix project with:
+mix new dynamic_producer_tutorial --sup
+It&amp;rsquo;s going to create new mix project with default supervision tree, now to finish add gen_stage to our mix.exs dependencies with:
+{:gen_stage, &amp;quot;~&amp;gt; 0.14&amp;quot;}
+and update your project with mix deps." />
+<meta property="og:url" content="https://norbertka.me/posts/dynamic_genstage_producers/" />
+<meta property="og:site_name" content="Dynamic gen_stage producers" />
+<meta property="og:image" content="">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+<meta property="article:published_time" content="2019-02-21 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="">
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    NorbertKa
+  </div>
+</a>
+
+    </div>
+    <div class="menu-trigger">menu</div>
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/norberts_kakste_cv.pdf">CV</a></li>
+        
+      
+        
+          <li><a href="https://github.com/nkyian">Github</a></li>
+        
+      
+        
+          <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
+        
+      
+        
+          <li><a href="/showcase">Showcase</a></li>
+        
+      
+      
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+      
+        <li><a href="/norberts_kakste_cv.pdf">CV</a></li>
+      
+    
+      
+        <li><a href="https://github.com/nkyian">Github</a></li>
+      
+    
+      
+        <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
+      
+    
+      
+        <li><a href="/showcase">Showcase</a></li>
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="https://norbertka.me/posts/dynamic_genstage_producers/">Dynamic gen_stage producers</a></h1>
+  <div class="post-meta">
+    <span class="post-date">
+      2019-02-21
+    </span>
+    
+    <span class="post-author">::
+      Norberts Kakste
+    </span>
+    
+  </div>
+
+  
+  <span class="post-tags">
+    
+    #<a href="https://norbertka.me/tags/elixir/">elixir</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/gen_stage/">gen_stage</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/streaming/">streaming</a>&nbsp;
+    
+    #<a href="https://norbertka.me/tags/events/">events</a>&nbsp;
+    
+  </span>
+  
+
+  
+
+  <div class="post-content">
+    <p>Recently I discovered that dealing with dynamic <code>gen_stage</code> producers is quite tricky, since you need to manage their supervision, subscription and de-subscription, while also handling their failure gracefully.</p>
+
+<p>To start with this project create new <code>mix</code> project with:</p>
+
+<p><code>mix new dynamic_producer_tutorial --sup</code></p>
+
+<p>It&rsquo;s going to create new mix project with default supervision tree, now to finish add <code>gen_stage</code> to our <code>mix.exs</code> dependencies with:</p>
+
+<p><code>{:gen_stage, &quot;~&gt; 0.14&quot;}</code></p>
+
+<p>and update your project with <code>mix deps.get</code></p>
+
+<p>Starting with everything create simple <code>gen_stage</code> producer with <code>name</code> as an parameter (to differentiate between multiple producers) that emits numbers when demanded:</p>
+
+<pre><code class="language-elixir">defmodule DynamicProducer do
+    use GenStage
+  
+    def start_link(name) do
+      GenStage.start_link(DynamicProducer, 0, name: name)
+    end
+  
+    def init(counter) do
+      {:producer, counter}
+    end
+  
+    def handle_demand(demand, counter) when demand &gt; 0 do
+      events = Enum.to_list(counter..counter+demand-1)
+      {:noreply, events, counter + demand}
+    end
+end
+</code></pre>
+
+<p>and then create simple <code>:consumer</code> that&rsquo;s gonna consume our <code>DynamicProducer</code></p>
+
+<pre><code class="language-elixir">defmodule Consumer do
+    use GenStage
+  
+    def start_link(_ignore) do
+      # For simplicity we'll name our GenStage with __MODULE__
+      GenStage.start_link(Consumer, :ok, name: __MODULE__)
+    end
+  
+    def init(:ok) do
+      {:consumer, :state_doesnt_matter}
+    end
+  
+    def handle_events(events, _from, state) do
+      # Wait for a second.
+      Process.sleep(1000)
+  
+      # Inspect the events.
+      IO.inspect(events)
+  
+      # We are a consumer, so we would never emit items.
+      {:noreply, [], state}
+    end
+end
+</code></pre>
+
+<p>Now we&rsquo;re gonna create subscription function for our <code>Consumer</code> to subscribe to <code>DynamicConsumer</code></p>
+
+<pre><code class="language-elixir">def subscribe_to_producer(producer) do
+    GenStage.sync_subscribe(__MODULE__,
+    to: producer)
+end
+</code></pre>
+
+<p>Now to supervise everything we&rsquo;ll need to create <code>DynamicProducerSupervisor</code> and <code>ConsumerSupervisor</code>.</p>
+
+<p>Starting with <code>DynamicProducerSupervisor</code> just create basic <code>DynamicSupervisor</code> that&rsquo;s gonna look after our <code>DynamicProducers</code>, while also adding extra function to handle our <code>DynamicProducer</code> supervision.</p>
+
+<pre><code class="language-elixir">defmodule DynamicProducerSupervisor do
+    # Automatically defines child_spec/1
+    use DynamicSupervisor
+  
+    def start_link(_ignore) do
+      DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
+    end
+  
+    @impl true
+    def init(_arg) do
+      DynamicSupervisor.init(strategy: :one_for_one)
+    end
+
+    # Start DynamicProducer under DynamicProducerSupervisor
+    def start_dynamic_producer(name) do
+        DynamicSupervisor.start_child(__MODULE__, {DynamicProducer, name})
+    end
+end
+</code></pre>
+
+<p>Do the same for <code>ConsumerSupervisor</code> but instead of <code>DynamicSupervisor</code> use regular <code>supervisor</code> that automatically starts our <code>Consumer</code></p>
+
+<pre><code class="language-elixir">defmodule ConsumerSupervisor do
+    use Supervisor
+
+    def start_link(_ignore) do
+        Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
+    end
+
+    def init(_init_arg) do
+        children = [
+            Consumer
+        ]
+
+        Supervisor.init(children, strategy: :one_for_one)
+    end
+end
+</code></pre>
+
+<p>Now linking everything together in <code>application.ex</code></p>
+
+<pre><code class="language-elixir">defmodule DynamicProducerTutorial.Application do
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Applications
+  @moduledoc false
+
+  use Application
+
+  def start(_type, _args) do
+    # List all child processes to be supervised
+    children = [
+      ConsumerSupervisor,
+      DynamicProducerSupervisor
+    ]
+
+    # See https://hexdocs.pm/elixir/Supervisor.html
+    # for other strategies and supported options
+    opts = [strategy: :one_for_one, name: DynamicProducerTutorial.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+</code></pre>
+
+<p>Starting our application with <code>iex -S mix</code> and opening <code>observer</code> with <code>:observer.start</code> we can see that our <code>ConsumerSupervisor</code>, <code>DynamicProducerSupervisor</code> supervisor are started while <code>Consumer</code> is sitting under <code>ConsumerSupervisor</code> as it should be.</p>
+
+<p>Now when testing and spawning <code>DynamicProducers</code> we&rsquo;ll gonna run into one problem. First of all create new <code>DynamicProducers</code> with our <code>start_dynamic_producer</code> function</p>
+
+<pre><code class="language-elixir">iex(1)&gt; DynamicProducerSupervisor.start_dynamic_producer(:first)
+{:ok, #PID&lt;0.234.0&gt;}
+iex(2)&gt; DynamicProducerSupervisor.start_dynamic_producer(:second)
+{:ok, #PID&lt;0.247.0&gt;}
+iex(7)&gt; DynamicProducerSupervisor.start_dynamic_producer(:third)
+{:ok, #PID&lt;0.251.0&gt;}
+</code></pre>
+
+<p>We started three <code>DynamicProducers</code> but while we started them, we still need to subscribe them to our <code>Consumer</code> to do that improve our <code>DynamicProducerSupervisor</code> <code>start_dynamic_producer</code> function that&rsquo;s gonna handle our <code>subscription</code> to <code>Consumer</code></p>
+
+<pre><code class="language-elixir">def start_dynamic_producer(name) do
+    case DynamicSupervisor.start_child(__MODULE__, {DynamicProducer, name}) do
+        {:ok, pid} -&gt; Consumer.subscribe_to_producer(pid)
+        {:error, error} -&gt; {:error, error}
+    end
+end
+</code></pre>
+
+<p>Here we handle successful <code>DynamicSupervisor</code> <code>start_child</code> function and subscribe our <code>Consumer</code> to specifiec <code>DynamicProducer</code></p>
+
+<p>To test our application lower our <code>max_demand</code> and <code>min_demand</code> for our <code>Consumer</code> to see that it&rsquo;s working properly.</p>
+
+<p>Updating our <code>subscribe_to_producer</code> function to lower min and max demand</p>
+
+<pre><code class="language-elixir">def subscribe_to_producer(producer) do
+    GenStage.sync_subscribe(__MODULE__,
+    to: producer, max_demand: 10, min_demand: 5)
+end
+</code></pre>
+
+<p>Now when running our code with <code>iex -S mix</code> and spawning one <code>DynamicConsumer</code> you should see flow of events (integers)</p>
+
+<pre><code class="language-elixir">iex(1)&gt; DynamicProducerSupervisor.start_dynamic_producer(:first)
+{:ok, #Reference&lt;0.2463511266.3560701959.236556&gt;}
+
+iex(2)&gt; [0, 1, 2, 3, 4]
+iex(2)&gt; [5, 6, 7, 8, 9]
+iex(2)&gt; [10, 11, 12, 13, 14]
+iex(2)&gt; [15, 16, 17, 18, 19]
+iex(2)&gt; [20, 21, 22, 23, 24]
+iex(2)&gt; [25, 26, 27, 28, 29]
+iex(2)&gt; [30, 31, 32, 33, 34]
+</code></pre>
+
+<p>But what happens when we try to kill our <code>:first</code> <code>DynamicProducer</code>?</p>
+
+<pre><code class="language-elixir">09:55:07.097 [error] GenServer Consumer terminating
+** (stop) killed
+Last message: {:DOWN, #Reference&lt;0.608917270.3828613121.210867&gt;, :process, #PID&lt;0.174.0&gt;, :killed}
+State: :state_doesnt_matter
+</code></pre>
+
+<p>That&rsquo;s not good, we just killed our <code>DynamicProducer</code> but together with it we also killed our <code>Consumer</code>! So how could we fix this problem? Reading through <code>gen_stage</code> documentation you might have catched that you can specify <code>subscription</code> options when subscribing to producers. Now testing out <code>:temporary</code> option with our <code>Consumer</code> we can check if it does fix our problem with crashing <code>Consumer</code>.</p>
+
+<p>Updating our <code>subscribe_to_producer</code> function:</p>
+
+<pre><code class="language-elixir">def subscribe_to_producer(producer) do
+    GenStage.sync_subscribe(__MODULE__,
+    to: producer, max_demand: 10, min_demand: 5, cancel: :temporary)
+end
+</code></pre>
+
+<p>Now when we kill our <code>:first</code> <code>DynamicProducer</code> Consumer is still up and running!</p>
+
+  </div>
+  
+  <div class="pagination">
+    <div class="pagination__title">
+      <span
+        class="pagination__title-h">Read other posts</span>
+      <hr />
+    </div>
+    <div class="pagination__buttons">
+      
+      <span class="button previous">
+        <a href="https://norbertka.me/posts/twitch-chat-client-part-1/">
+          <span class="button__icon">←</span>
+          <span class="button__text">Twitch chat Client (part 1)</span>
+        </a>
+      </span>
+      
+      
+      <span class="button next">
+        <a href="https://norbertka.me/posts/elixir-akka-comparision/">
+          <span class="button__text">OTP - Akka comparison (part 1)</span>
+          <span class="button__icon">→</span>
+        </a>
+      </span>
+      
+    </div>
+  </div>
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright">
+        <span>© 2019 Powered by <a href="http://gohugo.io">Hugo</a></span>
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+    
+  </div>
+</footer>
+
+<script src="https://norbertka.me/assets/main.js"></script>
+<script src="https://norbertka.me/assets/prism.js"></script>
+<script src="https://norbertka.me/js/asciinema-player.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

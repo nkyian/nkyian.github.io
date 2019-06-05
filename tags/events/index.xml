@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Events on NorbertKa</title>
+    <link>https://norbertka.me/tags/events/</link>
+    <description>Recent content in Events on NorbertKa</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 21 Feb 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://norbertka.me/tags/events/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Dynamic gen_stage producers</title>
+      <link>https://norbertka.me/posts/dynamic_genstage_producers/</link>
+      <pubDate>Thu, 21 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://norbertka.me/posts/dynamic_genstage_producers/</guid>
+      <description>Recently I discovered that dealing with dynamic gen_stage producers is quite tricky, since you need to manage their supervision, subscription and de-subscription, while also handling their failure gracefully.
+To start with this project create new mix project with:
+mix new dynamic_producer_tutorial --sup
+It&amp;rsquo;s going to create new mix project with default supervision tree, now to finish add gen_stage to our mix.exs dependencies with:
+{:gen_stage, &amp;quot;~&amp;gt; 0.14&amp;quot;}
+and update your project with mix deps.</description>
+    </item>
+    
+  </channel>
+</rss>
