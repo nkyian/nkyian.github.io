@@ -6,19 +6,10 @@
     <description>Recent content on NorbertKa</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 28 May 2019 16:20:48 +0300</lastBuildDate>
+    <lastBuildDate>Fri, 24 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://norbertka.me/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>About</title>
-      <link>https://norbertka.me/about/</link>
-      <pubDate>Tue, 28 May 2019 16:20:48 +0300</pubDate>
-      
-      <guid>https://norbertka.me/about/</guid>
-      <description></description>
-    </item>
     
     <item>
       <title>Twitch chat Client (part 2) [DRAFT]</title>
