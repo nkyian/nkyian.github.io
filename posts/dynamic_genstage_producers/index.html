@@ -113,10 +113,6 @@ and update your project with mix deps." />
           <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
         
       
-        
-          <li><a href="/showcase">Showcase</a></li>
-        
-      
       
     
   </ul>
@@ -137,10 +133,6 @@ and update your project with mix deps." />
     
       
         <li><a href="https://medium.com/@norberts.kakste">Medium</a></li>
-      
-    
-      
-        <li><a href="/showcase">Showcase</a></li>
       
     
   </ul>
@@ -373,17 +365,37 @@ Last message: {:DOWN, #Reference&lt;0.608917270.3828613121.210867&gt;, :process,
 State: :state_doesnt_matter
 </code></pre>
 
-<p>That&rsquo;s not good, we just killed our <code>DynamicProducer</code> but together with it we also killed our <code>Consumer</code>! So how could we fix this problem? Reading through <code>gen_stage</code> documentation you might have catched that you can specify <code>subscription</code> options when subscribing to producers. Now testing out <code>:temporary</code> option with our <code>Consumer</code> we can check if it does fix our problem with crashing <code>Consumer</code>.</p>
+<p>That&rsquo;s not good, we just killed our <code>DynamicProducer</code> but together with it we also killed our <code>Consumer</code>! So how could we fix this problem? Reading through <code>gen_stage</code> documentation you might have catched that you can specify <code>subscription</code> options when subscribing to producers. Now testing out <code>:transient</code> option with our <code>Consumer</code> we can check if it does fix our problem with crashing <code>Consumer</code>.</p>
 
 <p>Updating our <code>subscribe_to_producer</code> function:</p>
 
 <pre><code class="language-elixir">def subscribe_to_producer(producer) do
     GenStage.sync_subscribe(__MODULE__,
-    to: producer, max_demand: 10, min_demand: 5, cancel: :temporary)
+    to: producer, max_demand: 10, min_demand: 5, cancel: :transient)
 end
 </code></pre>
 
-<p>Now when we kill our <code>:first</code> <code>DynamicProducer</code> Consumer is still up and running!</p>
+<p>Now when we kill our <code>:first</code> <code>DynamicProducer</code> Consumer is still up and running, while it&rsquo;s good it doesn&rsquo;t auto-resubscribe back to our restart <code>DynamicProducer</code> to fix that we need to register our <code>GenServers</code> or more specifically <code>GenStages</code> with <code>Registry</code> to do that create new Registry process under <code>application.exs</code></p>
+
+<pre><code class="language-elixir">children = [
+      ConsumerSupervisor,
+      DynamicProducerSupervisor,
+      {Registry, keys: :unique, name: Registry.DynamicProducers}
+    ]
+</code></pre>
+
+<p>Updating our <code>DynamicProducer</code> with proper name registry</p>
+
+<p>DynamicProducer:</p>
+
+<pre><code class="language-elixir">def start_link(name) when is_atom(name) do
+    GenStage.start_link(DynamicProducer, 0,
+    name: {:via, Registry, {Registry.DynamicProducers, name}},
+    restart: :transient)
+end
+</code></pre>
+
+<p>After changing our name registration when we kill our <code>DynamicProducer</code> it should link back to <code>Consumer</code> without crashing it and un-subscribing.</p>
 
   </div>
   
